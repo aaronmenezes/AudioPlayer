@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.sothree.slidinguppanel.SlidingUpPanelLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:sothree="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/activity_layout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:gravity="bottom"
+    sothree:umanoPanelHeight="68dp"
+    sothree:umanoShadowHeight="4dp"
+    tools:context=".MainActivity">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="center">
+
+        <Spinner
+            android:id="@+id/category_spinner"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="30dp"
+            android:padding="20dp"/>
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/item_list"
+            android:layout_below="@id/category_spinner"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginTop="20dp"/>
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/panelDownColor"
+        android:gravity="center|top">
+
+        <RelativeLayout
+            android:id="@+id/mini_player"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <ImageButton
+                android:id="@+id/mini_btn_prev"
+                android:layout_width="64dp"
+                android:layout_height="64dp"
+                android:layout_toStartOf="@id/mini_btn_play"
+                android:background="@color/panelDownColor"
+                android:scaleType="fitXY"
+                android:src="@drawable/backward" />
+
+            <ImageButton
+                android:id="@+id/mini_btn_play"
+                android:layout_width="64dp"
+                android:layout_height="64dp"
+                android:layout_toStartOf="@id/mini_btn_next"
+                android:background="@color/panelDownColor"
+                android:scaleType="fitXY"
+                android:src="@drawable/play" />
+
+            <ImageButton
+                android:id="@+id/mini_btn_next"
+                android:layout_width="64dp"
+                android:layout_height="64dp"
+                android:layout_alignParentEnd="true"
+                android:background="@color/panelDownColor"
+                android:scaleType="fitXY"
+                android:src="@drawable/forward" />
+
+            <ImageView
+                android:id="@+id/mini_album_poster"
+                android:layout_width="64dp"
+                android:layout_height="64dp"
+                android:layout_alignParentStart="true"
+                android:src="@android:drawable/ic_menu_camera" />
+
+            <TextView
+                android:id="@+id/mini_track_title"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_centerVertical="true"
+                android:layout_toStartOf="@id/mini_btn_prev"
+                android:layout_toEndOf="@id/mini_album_poster"
+                android:textColor="#FFFFFF"
+                android:text="wwwwwwwww"
+                android:textSize="20sp" />
+
+        </RelativeLayout>
+        <include
+            android:id="@+id/player_window"
+            layout="@layout/player_window"/>
+
+    </RelativeLayout>
+
+</com.sothree.slidinguppanel.SlidingUpPanelLayout>
