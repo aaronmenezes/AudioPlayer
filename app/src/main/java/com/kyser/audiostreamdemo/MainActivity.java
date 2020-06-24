@@ -6,18 +6,17 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import android.graphics.Bitmap;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ImageButton;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.Spinner;
 import android.widget.TextView;
 
-import com.bumptech.glide.Glide;
-import com.bumptech.glide.request.target.Target;
 import com.sothree.slidinguppanel.SlidingUpPanelLayout;
 import com.spotify.android.appremote.api.ConnectionParams;
 import com.spotify.android.appremote.api.Connector;
@@ -29,6 +28,13 @@ import com.spotify.protocol.types.ListItems;
 import com.spotify.protocol.types.PlayerState;
 import com.spotify.protocol.types.Track;
 
+import java.sql.SQLOutput;
+import java.util.Locale;
+import java.util.concurrent.TimeUnit;
+
+import static com.spotify.protocol.types.Repeat.OFF;
+import static com.spotify.protocol.types.Repeat.ONE;
+
 public class MainActivity extends AppCompatActivity implements AdapterView.OnItemSelectedListener, View.OnClickListener, SlidingUpPanelLayout.PanelSlideListener {
     private static final String CLIENT_ID = "43205f60655840d49b53f30ac2226f77";
     private static final String REDIRECT_URI = "http://com.kyser.audiostreamdemo/callback";
@@ -39,6 +45,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
     private RecyclerView mAlbumList;
     private AlbumItemAdaptor mAlbumItemAdapter;
     private ListItems mListItems;
+    private ProgressBar mProgressBar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -50,6 +57,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         connectToRemote();
         mActivityLayout.setPanelState(SlidingUpPanelLayout.PanelState.HIDDEN);
         mActivityLayout.addPanelSlideListener(this);
+        mProgressBar = (ProgressBar)findViewById(R.id.player_track_progress);
     }
 
     private void setListeners() {
@@ -59,6 +67,8 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         findViewById(R.id.player_cntrls_play).setOnClickListener(this);
         findViewById(R.id.player_cntrls_next).setOnClickListener(this);
         findViewById(R.id.player_cntrls_prev).setOnClickListener(this);
+        findViewById(R.id.player_cntrls_shfl).setOnClickListener(this);
+        findViewById(R.id.player_cntrls_repeat).setOnClickListener(this);
         findViewById(R.id.player_minimize).setOnClickListener(this);
     }
     private void setRecyclerList(){
@@ -115,15 +125,16 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
     private void connected() {
         mActivityLayout.setPanelState(SlidingUpPanelLayout.PanelState.COLLAPSED);
         mSpotifyAppRemote.getPlayerApi().subscribeToPlayerState().setEventCallback(playerState -> {
-                togglePlayPause(playerState.isPaused);
+                togglePlayPause(playerState);
+                updateTrackProgress(playerState);
                 if(playerState.track==null) {
                     mActivityLayout.setPanelState(SlidingUpPanelLayout.PanelState.HIDDEN);
                 }else {
                     setPlayerInfo(playerState.track);
                 }
+
         });
 
-       // mSpotifyAppRemote.getPlayerApi().play("spotify:playlist:37i9dQZF1DX2sUQwD7tbmL");
        CallResult<ListItems> callresult=  mSpotifyAppRemote.getContentApi().getRecommendedContentItems("default" );
        callresult.setResultCallback(listItems -> {
            mListItems = listItems;
@@ -142,11 +153,54 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         bitmapResult_big.setResultCallback(bitmap -> ((ImageView) findViewById(R.id.player_poster)).setImageBitmap(bitmap));
     }
 
-    private void togglePlayPause(boolean isPaused) {
-        ((ImageButton)findViewById(R.id.mini_btn_play)).setImageDrawable(getDrawable(isPaused?R.drawable.play:R.drawable.pause));
-        ((ImageButton)findViewById(R.id.player_cntrls_play)).setImageDrawable(getDrawable(isPaused?R.drawable.play_1:R.drawable.pause_1));
+    private void togglePlayPause(PlayerState playerState) {
+        ((ImageButton)findViewById(R.id.mini_btn_play)).setImageDrawable(getDrawable(playerState.isPaused?R.drawable.play:R.drawable.pause));
+        ((ImageButton)findViewById(R.id.player_cntrls_play)).setImageDrawable(getDrawable(playerState.isPaused?R.drawable.play_1:R.drawable.pause_1));
+        ((ImageButton)findViewById(R.id.player_cntrls_shfl)).setImageDrawable(getDrawable(playerState.playbackOptions.isShuffling?R.drawable.shuffle_2:R.drawable.shuffle_off));
+        ((ImageButton)findViewById(R.id.player_cntrls_repeat)).setImageDrawable(getDrawable(playerState.playbackOptions.repeatMode==OFF ?R.drawable.repeat_none:(playerState.playbackOptions.repeatMode==ONE ?R.drawable.repeat_one:R.drawable.repeat_all)));
     }
 
+    private String getTimeFormMilli(long duration){
+        return  String.format(Locale.US,"%02d:%02d", TimeUnit.MILLISECONDS.toMinutes(duration), TimeUnit.MILLISECONDS.toSeconds(duration) -
+                TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(duration)));
+    }
+    boolean isProgressOn = false;
+    Track mCurrentTrack;
+    String mCurrentTrackTitle;
+    int mProgressCount = 0;
+    Runnable r = new Runnable() {
+        @Override
+        public void run() {
+            mProgressCount+=1;
+            long total_duration = (mCurrentTrack.duration/1000);
+            mProgressBar.setProgress((int)(mProgressCount/(total_duration/100) ));
+            ((TextView)findViewById(R.id.player_elapsed_duration)).setText(getTimeFormMilli(mProgressCount*1000));
+            if(isProgressOn)
+                updatePosition();
+        }
+    };
+    private void updateTrackProgress(PlayerState playerState){
+        if(!playerState.track.name.equals(mCurrentTrackTitle)){
+            mProgressBar.setProgress(0);
+            mProgressCount = 0;
+            mCurrentTrack= playerState.track;
+            mCurrentTrackTitle = mCurrentTrack.name ;
+            isProgressOn=false;
+
+            ((TextView)findViewById(R.id.player_total_duration)).setText(getTimeFormMilli(mCurrentTrack.duration));
+        }
+
+        if(!playerState.isPaused) {
+            if(!isProgressOn) {
+                isProgressOn = true;
+                updatePosition();
+            }
+        }
+        else isProgressOn =false;
+    }
+    private void updatePosition(){
+        boolean h = new Handler().postDelayed( r, 1000);
+    }
 
     @Override
     protected void onStop() {
@@ -192,6 +246,11 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
             mSpotifyAppRemote.getPlayerApi().skipNext();
         }else if(view.getId() == R.id.player_minimize){
             mActivityLayout.setPanelState(SlidingUpPanelLayout.PanelState.COLLAPSED);
+        }else if(view.getId() == R.id.player_cntrls_shfl){
+            mSpotifyAppRemote.getPlayerApi().toggleShuffle();
+        }
+        else if(view.getId() == R.id.player_cntrls_repeat){
+            mSpotifyAppRemote.getPlayerApi().toggleRepeat();
         }
     }
 
@@ -208,5 +267,13 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
             findViewById(R.id.mini_player).setVisibility(View.VISIBLE);
             findViewById(R.id.player_window).setVisibility(View.GONE);
         }
+    }
+
+    @Override
+    public void onBackPressed() {
+        if(mActivityLayout.getPanelState() == SlidingUpPanelLayout.PanelState.EXPANDED)
+            mActivityLayout.setPanelState(SlidingUpPanelLayout.PanelState.COLLAPSED);
+        else
+            super.onBackPressed();
     }
 }

@@ -83,6 +83,7 @@
                 android:layout_centerVertical="true"
                 android:layout_toStartOf="@id/mini_btn_prev"
                 android:layout_toEndOf="@id/mini_album_poster"
+                android:layout_marginStart="10dp"
                 android:textColor="#FFFFFF"
                 android:text="wwwwwwwww"
                 android:textSize="20sp" />

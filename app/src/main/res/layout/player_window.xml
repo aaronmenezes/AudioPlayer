@@ -65,13 +65,49 @@
         android:text="TextView"
         android:textSize="20sp"
         android:textColor="#ffffff"
-        android:layout_above="@id/player_controls"/>
+        android:layout_above="@id/player_track_progress"
+        android:layout_marginBottom="20dp"/>
+
+    <ProgressBar
+        android:id="@+id/player_track_progress"
+        style="?android:attr/progressBarStyleHorizontal"
+        android:layout_above="@id/player_controls"
+        android:layout_marginBottom="50dp"
+        android:progress="50"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingHorizontal="10dp" />
+
+    <TextView
+        android:id="@+id/player_elapsed_duration"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/player_track_progress"
+        android:layout_alignLeft="@id/player_track_progress"
+         android:layout_marginTop="-40dp"
+        android:paddingLeft="10dp"
+        android:text="00:00"
+        android:textColor="#ffffff"
+        android:textSize="14sp" />
+
+    <TextView
+        android:id="@+id/player_total_duration"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/player_track_progress"
+        android:layout_alignRight="@id/player_track_progress"
+        android:layout_marginTop="-40dp"
+        android:paddingRight="10dp"
+        android:text="99:99"
+        android:textColor="#ffffff"
+        android:textSize="14sp" />
 
     <RelativeLayout
         android:id="@+id/player_controls"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true" >
+        android:layout_alignParentBottom="true"
+        android:layout_marginBottom="60dp">
 
         <ImageButton
             android:id="@+id/player_cntrls_play"
@@ -81,8 +117,7 @@
             android:background="@android:color/transparent"
             android:scaleType="fitXY"
             android:layout_centerHorizontal="true"
-            android:layout_marginTop="20dp"
-            android:layout_marginBottom="80dp"/>
+            android:layout_marginTop="20dp"/>
 
         <ImageButton
             android:id="@+id/player_cntrls_prev"
@@ -93,7 +128,6 @@
             android:scaleType="fitXY"
             android:layout_toLeftOf="@id/player_cntrls_play"
             android:layout_marginTop="20dp"
-            android:layout_marginBottom="80dp"
             android:layout_marginEnd="10dp"/>
 
         <ImageButton
@@ -105,7 +139,6 @@
             android:scaleType="fitXY"
             android:layout_toRightOf="@id/player_cntrls_play"
             android:layout_marginTop="20dp"
-            android:layout_marginBottom="80dp"
             android:layout_marginStart="10dp"/>
 
         <ImageButton
@@ -116,8 +149,7 @@
             android:background="@android:color/transparent"
             android:scaleType="fitXY"
             android:layout_marginStart="10dp"
-            android:layout_marginTop="20dp"
-            android:layout_marginBottom="80dp"/>
+            android:layout_marginTop="20dp"/>
 
         <ImageButton
             android:id="@+id/player_cntrls_repeat"
@@ -128,8 +160,7 @@
             android:scaleType="fitXY"
             android:layout_alignParentEnd="true"
             android:layout_marginEnd="10dp"
-            android:layout_marginTop="20dp"
-            android:layout_marginBottom="80dp"/>
+            android:layout_marginTop="20dp" />
 
     </RelativeLayout>
 
