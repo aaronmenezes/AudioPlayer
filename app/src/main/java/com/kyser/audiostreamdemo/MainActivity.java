@@ -172,7 +172,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         @Override
         public void run() {
             mProgressCount+=1;
-            long total_duration = (mCurrentTrack.duration/1000);
+            long total_duration = mCurrentTrack.duration==0?1:(mCurrentTrack.duration/1000);
             mProgressBar.setProgress((int)(mProgressCount/(total_duration/100) ));
             ((TextView)findViewById(R.id.player_elapsed_duration)).setText(getTimeFormMilli(mProgressCount*1000));
             if(isProgressOn)
@@ -186,7 +186,6 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
             mCurrentTrack= playerState.track;
             mCurrentTrackTitle = mCurrentTrack.name ;
             isProgressOn=false;
-
             ((TextView)findViewById(R.id.player_total_duration)).setText(getTimeFormMilli(mCurrentTrack.duration));
         }
 
